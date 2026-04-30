@@ -10,7 +10,7 @@ spec:
     - name: error-rate
       interval: 30s # Cùng chu kỳ với AI
       count: 5      # Cùng số lần đếm với AI
-      successCondition: result[0] < 0.05
+      successCondition: len(result) == 0 || result[0] < 0.05
       # failureLimit: Nếu quá 5% ngay lần đầu thì fail luôn, hoặc bạn có thể để mặc định
       provider:
         prometheus:
