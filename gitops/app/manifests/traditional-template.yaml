@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: traditional-error-rate-check
+  namespace: default
+spec:
+  args:
+    - name: canary-service
+metrics:
+    - name: error-rate
+      interval: 30s
+      count: 5
+      # Ngưỡng tĩnh: Chỉ thành công nếu tỷ lệ lỗi < 5%
+      successCondition: result[0] < 0.05
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{service="{{args.canary-service}}", status=~"5.."}[1m])) 
+            / 
+            clamp_min(sum(rate(http_requests_total{service="{{args.canary-service}}"}[1m])), 0.001)
