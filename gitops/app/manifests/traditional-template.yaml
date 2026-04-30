@@ -1,8 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
-namespace: default
 metadata:
   name: traditional-error-rate-check
+  namespace: default
 spec:
   args:
     - name: canary-service
