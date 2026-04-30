@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: rl-canary-app
+  name: traditional-canary-app
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/thuanthentran/dqn-lstm-agent-driven-canary-release.git
+    repoURL: https://github.com/thuanthentran/traditional-canary-release-baseline.git
     targetRevision: main
     path: gitops/app/manifests
   destination:
