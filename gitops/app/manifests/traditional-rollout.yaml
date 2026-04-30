@@ -20,7 +20,7 @@ spec:
           image: ghcr.io/thuanthentran/traditional-canary-release-baseline/my-app:latest
           env:
             - name: APP_SCENARIO
-              value: "cascading-failure" # Thay đổi scenario để dễ thấy sự khác biệt giữa các bước
+              value: "critical_crash" # Thay đổi scenario để dễ thấy sự khác biệt giữa các bước
             - name: APP_VERSION
               value: "v4"
           ports:
