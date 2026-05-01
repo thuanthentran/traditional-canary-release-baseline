@@ -63,12 +63,18 @@ async def root():
             noise = random.uniform(-0.1, 0.1)
             await asyncio.sleep(max(0, delay + base_jitter + noise))
 
-        # 5. Kịch bản: Critical Crash
+        # 5.1 Kịch bản: Critical Crash
         elif SCENARIO == "critical_crash":
             await asyncio.sleep(base_jitter)
             if random.random() < 0.5:
                 error_codes = [500, 502, 503, 504]
                 return Response(content="System Failure", status_code=random.choice(error_codes))
+        # 5.2 Kịch bản: Minimal Crash (Sát thủ thầm lặng - Lỗi dưới ngưỡng tĩnh)
+        elif SCENARIO == "minimal_crash":
+            await asyncio.sleep(base_jitter)
+            # Cố tình set tỉ lệ lỗi là 4%, vừa đủ để chui lọt qua khe cửa 5% của truyền thống
+            if random.random() < 0.04:
+                return Response(content="Minor Glitch", status_code=500)
 
         # 6. Kịch bản: CPU Spike
         elif SCENARIO == "cpu_spike":
