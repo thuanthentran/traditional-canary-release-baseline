@@ -28,53 +28,81 @@ spec:
               containerPort: 8080
 
   strategy:
-    canary:
-      dynamicStableScale: true
-      canaryService: my-app-canary
-      stableService: my-app-stable
-      trafficRouting:
-        nginx:
-          stableIngress: my-app-ingress
-      
-      analysis:
-        successfulRunHistoryLimit: 1
-        unsuccessfulRunHistoryLimit: 2
+      canary:
+        dynamicStableScale: true
+        canaryService: my-app-canary
+        stableService: my-app-stable
+        trafficRouting:
+          nginx:
+            stableIngress: my-app-ingress
+        
+        analysis:
+          successfulRunHistoryLimit: 1
+          unsuccessfulRunHistoryLimit: 2
 
-      # CÁC BƯỚC ĐÃ ĐƯỢC CHIA NHỎ ĐỂ KHỚP 100% VỚI BẢN AI
-      steps:
-        - setWeight: 10
-        - analysis:
-            templates: [{templateName: traditional-comprehensive-check}]
-            args: [{name: canary-service, value: "my-app-canary"}]
-            
-        - setWeight: 20
-        - analysis:
-            templates: [{templateName: traditional-comprehensive-check}]
-            args: [{name: canary-service, value: "my-app-canary"}]
-            
-        - setWeight: 30
-        - analysis:
-            templates: [{templateName: traditional-comprehensive-check}]
-            args: [{name: canary-service, value: "my-app-canary"}]
-            
-        - setWeight: 40
-        - analysis:
-            templates: [{templateName: traditional-comprehensive-check}]
-            args: [{name: canary-service, value: "my-app-canary"}]
-            
-        - setWeight: 50
-        - analysis:
-            templates: [{templateName: traditional-comprehensive-check}]
-            args: [{name: canary-service, value: "my-app-canary"}]
-            
-        - setWeight: 60
-        - analysis:
-            templates: [{templateName: traditional-comprehensive-check}]
-            args: [{name: canary-service, value: "my-app-canary"}]
-            
-        - setWeight: 80
-        - analysis:
-            templates: [{templateName: traditional-comprehensive-check}]
-            args: [{name: canary-service, value: "my-app-canary"}]
-            
-        - setWeight: 100
+        # CÁC BƯỚC ĐÃ ĐƯỢC BỔ SUNG ĐẦY ĐỦ THAM SỐ
+        steps:
+          - setWeight: 10
+          - analysis:
+              templates: [{templateName: traditional-comprehensive-check}]
+              args: 
+                - name: canary-service
+                  value: "my-app-canary"
+                - name: canary-pod-hash
+                  valueFrom: {podTemplateHashValue: Latest}
+              
+          - setWeight: 20
+          - analysis:
+              templates: [{templateName: traditional-comprehensive-check}]
+              args: 
+                - name: canary-service
+                  value: "my-app-canary"
+                - name: canary-pod-hash
+                  valueFrom: {podTemplateHashValue: Latest}
+              
+          - setWeight: 30
+          - analysis:
+              templates: [{templateName: traditional-comprehensive-check}]
+              args: 
+                - name: canary-service
+                  value: "my-app-canary"
+                - name: canary-pod-hash
+                  valueFrom: {podTemplateHashValue: Latest}
+              
+          - setWeight: 40
+          - analysis:
+              templates: [{templateName: traditional-comprehensive-check}]
+              args: 
+                - name: canary-service
+                  value: "my-app-canary"
+                - name: canary-pod-hash
+                  valueFrom: {podTemplateHashValue: Latest}
+              
+          - setWeight: 50
+          - analysis:
+              templates: [{templateName: traditional-comprehensive-check}]
+              args: 
+                - name: canary-service
+                  value: "my-app-canary"
+                - name: canary-pod-hash
+                  valueFrom: {podTemplateHashValue: Latest}
+              
+          - setWeight: 60
+          - analysis:
+              templates: [{templateName: traditional-comprehensive-check}]
+              args: 
+                - name: canary-service
+                  value: "my-app-canary"
+                - name: canary-pod-hash
+                  valueFrom: {podTemplateHashValue: Latest}
+              
+          - setWeight: 80
+          - analysis:
+              templates: [{templateName: traditional-comprehensive-check}]
+              args: 
+                - name: canary-service
+                  value: "my-app-canary"
+                - name: canary-pod-hash
+                  valueFrom: {podTemplateHashValue: Latest}
+              
+          - setWeight: 100
