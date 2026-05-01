@@ -1,21 +1,56 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
-  name: traditional-error-rate-check
+  name: traditional-comprehensive-check
   namespace: default
 spec:
   args:
     - name: canary-service
+    - name: canary-pod-hash # Argo tự động truyền hash của bản mới vào
   metrics:
+    # 1. KIỂM TRA ERROR RATE (e_canary)
     - name: error-rate
-      interval: 30s # Cùng chu kỳ với AI
-      count: 5      # Cùng số lần đếm với AI
+      interval: 30s
+      count: 5
       successCondition: len(result) == 0 || result[0] < 0.05
-      # failureLimit: Nếu quá 5% ngay lần đầu thì fail luôn, hoặc bạn có thể để mặc định
       provider:
         prometheus:
           address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
           query: |
             sum(rate(http_requests_total{service="{{args.canary-service}}", status=~"5.."}[1m])) 
-            / 
-            clamp_min(sum(rate(http_requests_total{service="{{args.canary-service}}"}[1m])), 0.001)
+            / clamp_min(sum(rate(http_requests_total{service="{{args.canary-service}}"}[1m])), 0.001)
+
+    # 2. KIỂM TRA LATENCY (l_canary)
+    - name: latency-p95
+      interval: 30s
+      count: 5
+      successCondition: len(result) == 0 || result[0] < 2.0 # Ngưỡng 2 giây
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.95, sum by(le) (rate(http_request_duration_seconds_bucket{service="{{args.canary-service}}"}[1m])))
+
+    # 3. KIỂM TRA CPU UTILIZATION (cpu)
+    - name: cpu-usage
+      interval: 30s
+      count: 5
+      # Ví dụ: Thành công nếu CPU của các pod Canary < 0.5 Cores
+      successCondition: len(result) == 0 || result[0] < 0.5
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(container_cpu_usage_seconds_total{pod=~"my-app-.*-{{args.canary-pod-hash}}.*", container="my-app"}[1m]))
+
+    # 4. KIỂM TRA MEMORY LEAK (mem)
+    - name: memory-usage
+      interval: 30s
+      count: 5
+      # Ví dụ: Thành công nếu RAM của pod Canary < 200MB (200 * 1024 * 1024 bytes)
+      successCondition: len(result) == 0 || result[0] < 209715200 
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(container_memory_working_set_bytes{pod=~"my-app-.*-{{args.canary-pod-hash}}.*", container="my-app"})
