@@ -1,0 +1,80 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: my-app-release
+  namespace: default
+spec:
+  replicas: 5
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: my-app
+          image: ghcr.io/thuanthentran/traditional-canary-release-baseline/my-app:latest
+          env:
+            - name: APP_SCENARIO
+              value: "cascading_failure" # Thay đổi scenario để dễ thấy sự khác biệt giữa các bước
+            - name: APP_VERSION
+              value: "v2.0.0"
+          ports:
+            - name: http
+              containerPort: 8080
+
+  strategy:
+    canary:
+      dynamicStableScale: true
+      canaryService: my-app-canary
+      stableService: my-app-stable
+      trafficRouting:
+        nginx:
+          stableIngress: my-app-ingress
+      
+      analysis:
+        successfulRunHistoryLimit: 1
+        unsuccessfulRunHistoryLimit: 2
+
+      # CÁC BƯỚC ĐÃ ĐƯỢC CHIA NHỎ ĐỂ KHỚP 100% VỚI BẢN AI
+      steps:
+        - setWeight: 10
+        - analysis:
+            templates: [{templateName: traditional-error-rate-check}]
+            args: [{name: canary-service, value: "my-app-canary"}]
+            
+        - setWeight: 20
+        - analysis:
+            templates: [{templateName: traditional-error-rate-check}]
+            args: [{name: canary-service, value: "my-app-canary"}]
+            
+        - setWeight: 30
+        - analysis:
+            templates: [{templateName: traditional-error-rate-check}]
+            args: [{name: canary-service, value: "my-app-canary"}]
+            
+        - setWeight: 40
+        - analysis:
+            templates: [{templateName: traditional-error-rate-check}]
+            args: [{name: canary-service, value: "my-app-canary"}]
+            
+        - setWeight: 50
+        - analysis:
+            templates: [{templateName: traditional-error-rate-check}]
+            args: [{name: canary-service, value: "my-app-canary"}]
+            
+        - setWeight: 60
+        - analysis:
+            templates: [{templateName: traditional-error-rate-check}]
+            args: [{name: canary-service, value: "my-app-canary"}]
+            
+        - setWeight: 80
+        - analysis:
+            templates: [{templateName: traditional-error-rate-check}]
+            args: [{name: canary-service, value: "my-app-canary"}]
+            
+        - setWeight: 100
