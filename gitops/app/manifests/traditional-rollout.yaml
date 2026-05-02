@@ -22,7 +22,7 @@ spec:
             - name: APP_SCENARIO
               value: "minimal_crash" # Thay đổi scenario để dễ thấy sự khác biệt giữa các bước
             - name: APP_VERSION
-              value: "v3.0.0"
+              value: "v3.0.1"
           ports:
             - name: http
               containerPort: 8080
